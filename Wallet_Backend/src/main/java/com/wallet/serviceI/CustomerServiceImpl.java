@@ -15,6 +15,7 @@ import com.wallet.repo.AddressRepo;
 import com.wallet.repo.CustomerRepo;
 import com.wallet.service.AddressService;
 import com.wallet.service.CustomerService;
+import com.wallet.service.EmailScheduler;
 import com.wallet.service.EmailService;
 
 import jakarta.validation.Valid;
@@ -31,7 +32,7 @@ public class CustomerServiceImpl implements CustomerService{
 	CustomerRepo cr;
 	
 	@Autowired
-	EmailService es;
+	EmailScheduler es;
 	
 	private final AddressService as;
 
@@ -49,8 +50,7 @@ public class CustomerServiceImpl implements CustomerService{
 				.gender(customerRequst.getGender()).address(as.newAdd(customerRequst)).build();
 		Customer res = cr.save(newCust);
 		Email email = new Email(customerRequst.getEmailId(),"You have succcessfully created account on our wallet-app","Welcome mail");
-		String mres = es.sendSimpleMail(email);
-		System.out.println(mres);
+		es.scheduleEmail(email);
 		return res.getCustomerId();
 	}
 
