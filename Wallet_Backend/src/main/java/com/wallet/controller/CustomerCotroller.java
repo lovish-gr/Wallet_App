@@ -1,5 +1,6 @@
 package com.wallet.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,7 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.itextpdf.text.DocumentException;
 import com.wallet.dto.common.ApiResponse;
 import com.wallet.dto.request.CustomerDocDto;
 import com.wallet.dto.request.CustomerLoginDto;
@@ -31,6 +36,7 @@ import com.wallet.model.Customer;
 import com.wallet.model.CustomerDocuments;
 import com.wallet.service.CustomerDocumentsService;
 import com.wallet.service.CustomerService;
+import com.wallet.service.PdfService;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -47,6 +53,7 @@ public class CustomerCotroller {
 	CustomerService cs;
 	
 	private final CustomerDocumentsService cds;
+	private final PdfService ps;
 	
 	@PostMapping(value = "/signup")
 	public ResponseEntity<ApiResponse> createCustomer(@RequestBody @Valid CustomerRequestDto custReq){
@@ -242,7 +249,45 @@ public class CustomerCotroller {
 	        return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
+		
 	
+	
+	@PostMapping("/upload")
+    public ResponseEntity<String> uploadCustomers(@RequestParam("file") MultipartFile file) {
+        String response = cs.saveCustomerFromExcel(file);
+        return ResponseEntity.ok(response);
+    }
+	
+	
+	 @GetMapping("/download-sample")
+	    public ResponseEntity<InputStreamResource> downloadSample() {
+	        ByteArrayInputStream in = cs.downloadSampleExcel();
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Disposition", "attachment; filename=customer_sample.xlsx");
+
+	        return ResponseEntity.ok()
+	                .headers(headers)
+	                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+	                .body(new InputStreamResource(in));
+	    }
+	 
+	 @GetMapping("/pdf/{id}")
+	    public ResponseEntity<byte[]> generatePdf(@PathVariable int id) {
+	        try {
+	            ByteArrayInputStream bis = ps.generateCustomerPdf(id);
+	            HttpHeaders headers = new HttpHeaders();
+	            headers.add("Content-Disposition", "inline; filename=customer_" + id + ".pdf");
+
+	            return ResponseEntity
+	                    .ok()
+	                    .headers(headers)
+	                    .contentType(MediaType.APPLICATION_PDF)
+	                    .body(bis.readAllBytes());
+	        } catch (DocumentException e) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	        }
+	    }
 	
 	@PostMapping(value = "/login")
 	public ResponseEntity<ApiResponse> customerAuth(@RequestBody CustomerLoginDto custAuth){

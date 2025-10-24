@@ -30,7 +30,6 @@ public class Account {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq1")
 	private int accountNumber;
 	@ManyToOne
-//	@JoinColumn(name = "cutomerFk")
 	private Customer customer;
 	@Enumerated(EnumType.STRING)
 	private AccountType accType;
