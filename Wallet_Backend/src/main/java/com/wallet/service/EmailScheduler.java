@@ -4,5 +4,7 @@ import com.wallet.model.Email;
 
 public interface EmailScheduler {
 	
-	public void scheduleEmail(Email email);
+	public void scheduleWelcomeEmail(Email email);
+	
+	public void scheduleLastDayMail();
 }

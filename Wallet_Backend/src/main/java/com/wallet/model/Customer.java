@@ -45,6 +45,7 @@ public class Customer {
 	
 	String password;
 	private LocalDate registrationDate;
+	private LocalDate lastTrailDate;
 	
 	@OneToMany(targetEntity = Account.class, mappedBy = "customer")
 	private List<Account> accoutns=new ArrayList<>();
