@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wallet.dto.common.ApiResponse;
 import com.wallet.dto.request.TransactionDto;
-import com.wallet.repo.TransactionRepo;
 import com.wallet.service.TransactionService;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/transaction")
+@RequestMapping(value="/transaction")
 public class TransactionController {
 	
 	@Autowired
@@ -24,6 +23,7 @@ public class TransactionController {
 	
 	@PostMapping("/transfer")
 	public ResponseEntity<ApiResponse> transfer(@RequestBody TransactionDto data){
+		System.out.println("request rec");
 		int transactionId = ts.transfer(data);
 		ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(),"transfer successful",transactionId);
 		return new ResponseEntity<ApiResponse>(apiRes,HttpStatus.OK);

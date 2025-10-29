@@ -21,24 +21,26 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo tr;
-	
+
 	private final AccountRepo ar;
-	
+
 	@Override
 	public int transfer(TransactionDto tranReq) {
 		// TODO Auto-generated method stub
 		Account frmAcc = ar.findByAccountNumber(tranReq.fromAccountNumber);
 		Account toAcc = ar.findByAccountNumber(tranReq.accountNumber);
-		
-		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance()-tranReq.amount);
-		toAcc.setOpeningBalance(toAcc.getOpeningBalance()+tranReq.amount);
-		Transaction credTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description).frmaccfk(frmAcc).toaccfk(toAcc).transaction_date(LocalDate.now()).transaction_type(TransactionType.CREDIT).build();
-		Transaction debTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description).frmaccfk(toAcc).toaccfk(frmAcc).transaction_date(LocalDate.now()).transaction_type(TransactionType.DEBIT).build();
-		
-		
-		
+
+		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance() - tranReq.amount);
+		toAcc.setOpeningBalance(toAcc.getOpeningBalance() + tranReq.amount);
+		Transaction credTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description)
+				.frmaccfk(frmAcc).toaccfk(toAcc).transaction_date(LocalDate.now())
+				.transaction_type(TransactionType.CREDIT).build();
+		Transaction debTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description)
+				.frmaccfk(toAcc).toaccfk(frmAcc).transaction_date(LocalDate.now())
+				.transaction_type(TransactionType.DEBIT).build();
+
 		tr.save(debTrans);
-		
+
 		return tr.save(credTrans).getTransaction_id();
 	}
 
