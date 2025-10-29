@@ -13,6 +13,5 @@ import jakarta.validation.Valid;
 public interface CustomerService {
 	public Integer createCustomer(@Valid CustomerRequestDto customerRequst);
 	public Customer customerAuth(CustomerLoginDto custAuth);
-	public String saveCustomerFromExcel(MultipartFile file);
-	public ByteArrayInputStream downloadSampleExcel();
+	
 }

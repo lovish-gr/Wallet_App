@@ -48,259 +48,211 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(value = "/customer")
 @RequiredArgsConstructor
 public class CustomerCotroller {
-	
+
 	@Autowired
 	CustomerService cs;
-	
+
 	private final CustomerDocumentsService cds;
 	private final PdfService ps;
-	
+
 	@PostMapping(value = "/signup")
-	public ResponseEntity<ApiResponse> createCustomer(@RequestBody @Valid CustomerRequestDto custReq){
-	
-		
-		System.out.println("create api called"+new Date());
+	public ResponseEntity<ApiResponse> createCustomer(@RequestBody @Valid CustomerRequestDto custReq) {
+
+		System.out.println("create api called" + new Date());
 		System.out.println(custReq);
 		Integer genereatedCustId = cs.createCustomer(custReq);
-		
+
 		ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "customer created", genereatedCustId);
-		return new ResponseEntity<ApiResponse>(apiRes,HttpStatus.OK);
+		return new ResponseEntity<ApiResponse>(apiRes, HttpStatus.OK);
 	}
-	
-	
-	
-	
+
 	@PostMapping(value = "/custDoc", consumes = "multipart/form-data")
 	public ResponseEntity<ApiResponse> custDoc(@ModelAttribute CustomerDocDto data) {
-	try {
-	String uploadDir = "/Users/lovishgrover/Downloads/doc";
-	File dir = new File(uploadDir);
-	if (!dir.exists()) dir.mkdirs();
+		try {
+			String uploadDir = "/Users/lovishgrover/Downloads/doc";
+			File dir = new File(uploadDir);
+			if (!dir.exists())
+				dir.mkdirs();
 
-	File aadhaarDir = new File(uploadDir + "/aadhaar/");
-	if (!aadhaarDir.exists()) aadhaarDir.mkdirs();
-	File aadharPath = new File(aadhaarDir, data.getCustomerId() + "_AC" + data.getAadhaarFile().getOriginalFilename());
-	if (data.getAadhaarFile() != null && !data.getAadhaarFile().isEmpty()) {
-	data.getAadhaarFile().transferTo(aadharPath);
+			File aadhaarDir = new File(uploadDir + "/aadhaar/");
+			if (!aadhaarDir.exists())
+				aadhaarDir.mkdirs();
+			File aadharPath = new File(aadhaarDir,
+					data.getCustomerId() + "_AC" + data.getAadhaarFile().getOriginalFilename());
+			if (data.getAadhaarFile() != null && !data.getAadhaarFile().isEmpty()) {
+				data.getAadhaarFile().transferTo(aadharPath);
+			}
+
+			File panDir = new File(uploadDir + "/pan/");
+			if (!panDir.exists())
+				panDir.mkdirs();
+			File panPath = new File(panDir, data.getCustomerId() + "_P" + data.getPanFile().getOriginalFilename());
+			if (data.getPanFile() != null && !data.getPanFile().isEmpty()) {
+				data.getPanFile().transferTo(panPath);
+			}
+
+			File passportDir = new File(uploadDir + "/passport/");
+			if (!passportDir.exists())
+				passportDir.mkdirs();
+			File passportPath = new File(passportDir,
+					data.getCustomerId() + "_PP" + data.getPassportFile().getOriginalFilename());
+
+			if (data.getPassportFile() != null && !data.getPassportFile().isEmpty()) {
+				data.getPassportFile().transferTo(passportPath);
+			}
+			cds.newDoc(data.getCustomerId(), aadharPath.getAbsolutePath(), panPath.getAbsolutePath(),
+					passportPath.getAbsolutePath());
+
+			ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "Files saved successfully", true);
+			return new ResponseEntity<>(apiRes, HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			ApiResponse apiRes = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "File not saved",
+					e.getMessage());
+			return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
-	File panDir = new File(uploadDir + "/pan/");
-	if (!panDir.exists()) panDir.mkdirs();
-	File panPath = new File(panDir, data.getCustomerId() + "_P" + data.getPanFile().getOriginalFilename());
-	if (data.getPanFile() != null && !data.getPanFile().isEmpty()) {
-	data.getPanFile().transferTo(
-	panPath
-	);
-	}
-
-	File passportDir = new File(uploadDir + "/passport/");
-	if (!passportDir.exists()) passportDir.mkdirs();
-	File passportPath = new File(passportDir, data.getCustomerId() + "_PP" + data.getPassportFile().getOriginalFilename());
-
-	if (data.getPassportFile() != null && !data.getPassportFile().isEmpty()) {
-	data.getPassportFile().transferTo(
-	passportPath
-	);
-	}
-	cds.newDoc(data.getCustomerId(), aadharPath.getAbsolutePath(), panPath.getAbsolutePath(), passportPath.getAbsolutePath());
-
-	ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "Files saved successfully", true);
-	return new ResponseEntity<>(apiRes, HttpStatus.OK);
-
-	} catch (Exception e) {
-	e.printStackTrace();
-	ApiResponse apiRes = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "File not saved", e.getMessage());
-	return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-	}
-	
 	@GetMapping("/files")
 	public ResponseEntity<UrlResource> getFile(@RequestParam String path) {
-	    try {
-	        File file = new File(path);
-	        if (!file.exists()) {
-	            return ResponseEntity.notFound().build();
-	        }
+		try {
+			File file = new File(path);
+			if (!file.exists()) {
+				return ResponseEntity.notFound().build();
+			}
 
-	        Path filePath = file.toPath();
-	        UrlResource resource = new UrlResource(filePath.toUri());
-	        String contentType = Files.probeContentType(filePath);
+			Path filePath = file.toPath();
+			UrlResource resource = new UrlResource(filePath.toUri());
+			String contentType = Files.probeContentType(filePath);
 
-	        return ResponseEntity.ok()
-	                .contentType(MediaType.parseMediaType(contentType))
-	                .body(resource);
+			return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(resource);
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 
-	
 	@GetMapping("/custDoc/{customerId}")
 	public ResponseEntity<ApiResponse> getCustDoc(@PathVariable int customerId) {
-	    try {
-	        CustomerDocuments docData = cds.getDoc(customerId);
+		try {
+			CustomerDocuments docData = cds.getDoc(customerId);
 
-	        if (docData == null) {
-	            ApiResponse apiRes = new ApiResponse(HttpStatus.NOT_FOUND.value(), "No documents found", false);
-	            return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
-	        }
+			if (docData == null) {
+				ApiResponse apiRes = new ApiResponse(HttpStatus.NOT_FOUND.value(), "No documents found", false);
+				return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
+			}
 
-	        Map<String, String> paths = new HashMap<>();
-	        paths.put("aadhaarFilePath", docData.getAadhaarFilePath());
-	        paths.put("panFilePath", docData.getPanFilePath());
-	        paths.put("passportFilePath", docData.getPassportFilePath());
+			Map<String, String> paths = new HashMap<>();
+			paths.put("aadhaarFilePath", docData.getAadhaarFilePath());
+			paths.put("panFilePath", docData.getPanFilePath());
+			paths.put("passportFilePath", docData.getPassportFilePath());
 
-	        ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "Documents fetched successfully", paths);
-	        return new ResponseEntity<>(apiRes, HttpStatus.OK);
+			ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "Documents fetched successfully", paths);
+			return new ResponseEntity<>(apiRes, HttpStatus.OK);
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        ApiResponse apiRes = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to fetch documents", e.getMessage());
-	        return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			ApiResponse apiRes = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to fetch documents",
+					e.getMessage());
+			return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
-	
-	
+
 	@DeleteMapping(value = "/custDoc/{customerId}/{type}")
-	public ResponseEntity<ApiResponse> deleteDocument(
-	        @PathVariable int customerId,
-	        @PathVariable String type) {
-	    try {
-	        String uploadDir = "/Users/lovishgrover/Downloads/doc";
-	        String docType = type.toLowerCase();
-	        
-	        // Validate document type
-	        if (!docType.matches("aadhaar|pan|passport")) {
-	            ApiResponse apiRes = new ApiResponse(
-	                HttpStatus.BAD_REQUEST.value(),
-	                "Invalid document type",
-	                false
-	            );
-	            return new ResponseEntity<>(apiRes, HttpStatus.BAD_REQUEST);
-	        }
+	public ResponseEntity<ApiResponse> deleteDocument(@PathVariable int customerId, @PathVariable String type) {
+		try {
+			String uploadDir = "/Users/lovishgrover/Downloads/doc";
+			String docType = type.toLowerCase();
 
-	        // Construct directory path based on type
-	        File docDir = new File(uploadDir + "/" + docType + "/");
-	        
-	        if (!docDir.exists()) {
-	            ApiResponse apiRes = new ApiResponse(
-	                HttpStatus.NOT_FOUND.value(),
-	                "Document directory not found",
-	                false
-	            );
-	            return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
-	        }
+			// Validate document type
+			if (!docType.matches("aadhaar|pan|passport")) {
+				ApiResponse apiRes = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Invalid document type", false);
+				return new ResponseEntity<>(apiRes, HttpStatus.BAD_REQUEST);
+			}
 
-	        // Find and delete the file with matching customerId prefix
-	        File[] files = docDir.listFiles();
-	        boolean fileDeleted = false;
-	        String prefix = "";
-	        
-	        switch (docType) {
-	            case "aadhaar":
-	                prefix = customerId + "_AC";
-	                break;
-	            case "pan":
-	                prefix = customerId + "_P";
-	                break;
-	            case "passport":
-	                prefix = customerId + "_PP";
-	                break;
-	        }
+			// Construct directory path based on type
+			File docDir = new File(uploadDir + "/" + docType + "/");
 
-	        if (files != null) {
-	            for (File file : files) {
-	                if (file.getName().startsWith(prefix)) {
-	                    fileDeleted = file.delete();
-	                    if (fileDeleted) {
-	                        // Delete from database as well
-	                        cds .deleteDocFromDatabase(customerId, docType);
-	                        break;
-	                    }
-	                }
-	            }
-	        }
+			if (!docDir.exists()) {
+				ApiResponse apiRes = new ApiResponse(HttpStatus.NOT_FOUND.value(), "Document directory not found",
+						false);
+				return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
+			}
 
-	        if (fileDeleted) {
-	            ApiResponse apiRes = new ApiResponse(
-	                HttpStatus.OK.value(),
-	                "Document deleted successfully",
-	                true
-	            );
-	            return new ResponseEntity<>(apiRes, HttpStatus.OK);
-	        } else {
-	            ApiResponse apiRes = new ApiResponse(
-	                HttpStatus.NOT_FOUND.value(),
-	                "Document file not found",
-	                false
-	            );
-	            return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
-	        }
+			// Find and delete the file with matching customerId prefix
+			File[] files = docDir.listFiles();
+			boolean fileDeleted = false;
+			String prefix = "";
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        ApiResponse apiRes = new ApiResponse(
-	            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-	            "Failed to delete document",
-	            e.getMessage()
-	        );
-	        return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+			switch (docType) {
+			case "aadhaar":
+				prefix = customerId + "_AC";
+				break;
+			case "pan":
+				prefix = customerId + "_P";
+				break;
+			case "passport":
+				prefix = customerId + "_PP";
+				break;
+			}
+
+			if (files != null) {
+				for (File file : files) {
+					if (file.getName().startsWith(prefix)) {
+						fileDeleted = file.delete();
+						if (fileDeleted) {
+							// Delete from database as well
+							cds.deleteDocFromDatabase(customerId, docType);
+							break;
+						}
+					}
+				}
+			}
+
+			if (fileDeleted) {
+				ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "Document deleted successfully", true);
+				return new ResponseEntity<>(apiRes, HttpStatus.OK);
+			} else {
+				ApiResponse apiRes = new ApiResponse(HttpStatus.NOT_FOUND.value(), "Document file not found", false);
+				return new ResponseEntity<>(apiRes, HttpStatus.NOT_FOUND);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			ApiResponse apiRes = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete document",
+					e.getMessage());
+			return new ResponseEntity<>(apiRes, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
-		
-	
-	
-	@PostMapping("/upload")
-    public ResponseEntity<String> uploadCustomers(@RequestParam("file") MultipartFile file) {
-        String response = cs.saveCustomerFromExcel(file);
-        return ResponseEntity.ok(response);
-    }
-	
-	
-	 @GetMapping("/download-sample")
-	    public ResponseEntity<InputStreamResource> downloadSample() {
-	        ByteArrayInputStream in = cs.downloadSampleExcel();
 
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.add("Content-Disposition", "attachment; filename=customer_sample.xlsx");
 
-	        return ResponseEntity.ok()
-	                .headers(headers)
-	                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
-	                .body(new InputStreamResource(in));
-	    }
-	 
-	 @GetMapping("/pdf/{id}")
-	    public ResponseEntity<byte[]> generatePdf(@PathVariable int id) {
-	        try {
-	            ByteArrayInputStream bis = ps.generateCustomerPdf(id);
-	            HttpHeaders headers = new HttpHeaders();
-	            headers.add("Content-Disposition", "inline; filename=customer_" + id + ".pdf");
+	@GetMapping("/pdf/{id}")
+	public ResponseEntity<byte[]> generatePdf(@PathVariable int id) {
+		try {
+			ByteArrayInputStream bis = ps.generateCustomerPdf(id);
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Disposition", "inline; filename=customer_" + id + ".pdf");
 
-	            return ResponseEntity
-	                    .ok()
-	                    .headers(headers)
-	                    .contentType(MediaType.APPLICATION_PDF)
-	                    .body(bis.readAllBytes());
-	        } catch (DocumentException e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	        }
-	    }
-	
+			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(bis.readAllBytes());
+		} catch (DocumentException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
 	@PostMapping(value = "/login")
-	public ResponseEntity<ApiResponse> customerAuth(@RequestBody CustomerLoginDto custAuth){
+	public ResponseEntity<ApiResponse> customerAuth(@RequestBody CustomerLoginDto custAuth) {
 		System.out.println(custAuth);
 		Customer isAuth = cs.customerAuth(custAuth);
-		
-		if(isAuth != null){
+
+		if (isAuth != null) {
 			ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "login Successful", isAuth);
-			return new ResponseEntity<ApiResponse>(apiRes,HttpStatus.OK);
-		}else {
+			return new ResponseEntity<ApiResponse>(apiRes, HttpStatus.OK);
+		} else {
 			ApiResponse apiRes = new ApiResponse(HttpStatus.UNAUTHORIZED.value(), "login failed", isAuth);
-			return new ResponseEntity<ApiResponse>(apiRes,HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<ApiResponse>(apiRes, HttpStatus.UNAUTHORIZED);
 		}
-		
+
 	}
 }

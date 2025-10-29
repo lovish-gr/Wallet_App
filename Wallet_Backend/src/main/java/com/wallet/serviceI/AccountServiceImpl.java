@@ -1,12 +1,14 @@
 package com.wallet.serviceI;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wallet.dto.request.AccountRequestDto;
+import com.wallet.dto.response.AllAccountResponse;
 import com.wallet.model.Account;
 import com.wallet.model.Customer;
 import com.wallet.repo.AccountRepo;
@@ -32,5 +34,13 @@ public class AccountServiceImpl  implements AccountService{
 		Account newAcc = Account.builder().accType(accReq.getAccType()).customer(cust).openingBalance(accReq.getOpeningBalance()).openingDate(LocalDate.now()).description(accReq.getDescription()).build();
 		return ar.save(newAcc).getAccountNumber();
 	}
+
+
+	 @Override
+	    public List<Account> getAccountsByCustomerId(Integer customerId) {
+	        return ar.findByCustomerCustomerId(customerId);
+	    }
+	
+	
 
 }

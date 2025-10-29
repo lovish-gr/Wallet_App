@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wallet.dto.common.ApiResponse;
 import com.wallet.dto.request.TransactionDto;
-import com.wallet.repo.TransactionRepo;
 import com.wallet.service.TransactionService;
 
 @RestController

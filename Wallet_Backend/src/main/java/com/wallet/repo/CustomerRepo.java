@@ -15,5 +15,6 @@ public interface CustomerRepo extends JpaRepository<Customer, Integer>{
 	Customer  findByCustomerId(int customerId);
 	@Query("SELECT c FROM Customer c WHERE c.lastTrailDate = :today OR c.lastTrailDate = :tomorrow")
 	List<Customer> findCustomersExpiringTodayOrTomorrow(LocalDate today, LocalDate tomorrow);
+	Boolean existsByEmailId(String emailId);
 	
 }
