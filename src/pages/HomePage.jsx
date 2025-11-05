@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Hero from '../components/Hero'
 import Menu from '../components/Menu'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 function HomePage() {
     // const 
@@ -14,6 +14,9 @@ function HomePage() {
         return false;
       }
     };
+
+    const navigate = useNavigate();
+
 
     const location = useLocation();
     return(
@@ -26,10 +29,8 @@ function HomePage() {
                 <Menu/>
                 </>
             ) 
-                : (<div>login first</div>)
+                : (navigate('/login'))
             }
-            {/* <Hero data={location.state}/>
-            <Menu/> */}
             <Footer/>
         </>
     )

@@ -16,7 +16,6 @@ function AccForm() {
     axios.post("/account/create", values).then((res) => {
     //   console.log(res);
       if (res.data.message != null) {
-        // localStorage.setItem('customerId', res.data.data.customerId);
         console.log(res.data);
         alert(res.data.message );
         navigate("/")
