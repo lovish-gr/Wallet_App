@@ -1,5 +1,5 @@
 package com.wallet.model;
 
 public enum Gender {
-	MALE,FEMALE,Other;
+	MALE,FEMALE,OTHER;
 }

@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import com.wallet.model.Email;
 import com.wallet.service.EmailService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class EmailServiceImpl implements EmailService {
 
 	@Autowired
@@ -17,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public String sendSimpleMail(Email details) {
-		System.out.println("req rec");
+		log.info("req rec");
 		try {
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 

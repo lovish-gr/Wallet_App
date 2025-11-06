@@ -8,5 +8,5 @@ import com.wallet.model.Account;
 
 public interface AccountService {
 	public int saveAccount(AccountRequestDto accReq);
-	List<Account> getAccountsByCustomerId(Integer customerId);
+	List<AllAccountResponse> getAccountsByCustomerId(Integer customerId);
 }

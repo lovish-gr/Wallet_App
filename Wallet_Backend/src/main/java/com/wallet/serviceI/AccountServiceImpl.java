@@ -37,8 +37,19 @@ public class AccountServiceImpl  implements AccountService{
 
 
 	 @Override
-	    public List<Account> getAccountsByCustomerId(Integer customerId) {
-	        return ar.findByCustomerCustomerId(customerId);
+	    public List<AllAccountResponse> getAccountsByCustomerId(Integer customerId) {
+		 List<Account> accounts =  ar.findByCustomerCustomerId(customerId);
+		 List<AllAccountResponse> allAccountList = accounts.stream()
+		            .map(acc -> new AllAccountResponse(
+		                    acc.getAccountNumber(),
+		                    acc.getCustomer().getFirstName() + " " + acc.getCustomer().getLastName(),
+		                    acc.getAccType(),
+		                    acc.getOpeningBalance(),
+		                    acc.getOpeningDate(),
+		                    acc.getDescription()
+		            ))
+		            .toList();
+	        return allAccountList;
 	    }
 	
 	

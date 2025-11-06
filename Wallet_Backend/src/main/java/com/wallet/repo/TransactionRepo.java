@@ -10,6 +10,5 @@ import com.wallet.model.Transaction;
 
 public interface TransactionRepo extends JpaRepository<Transaction, Integer>{
 	
-
 	List<Transaction> findByFrmaccfk(Account account);
 }

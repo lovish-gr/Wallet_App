@@ -7,4 +7,5 @@ import com.wallet.model.Admins;
 public interface AdminRepo extends JpaRepository<Admins, Integer> {
 	
 	boolean existsByEmail(String email);
+	Admins findByEmailAndPass(String email, String pass);
 }

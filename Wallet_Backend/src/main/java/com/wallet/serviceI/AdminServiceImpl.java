@@ -6,14 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wallet.dto.request.AdminReqDto;
 import com.wallet.dto.request.CustomerRequestDto;
 import com.wallet.dto.response.BulkUploadResponse;
 import com.wallet.model.Address;
+import com.wallet.model.Admins;
 import com.wallet.model.Customer;
+import com.wallet.repo.AdminRepo;
 import com.wallet.repo.CustomerRepo;
 import com.wallet.service.AdminService;
 
@@ -24,10 +34,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
-
+	@Autowired
+	AdminRepo adminrepo;
+	
 	private final CustomerRepo customerRepo;
 	private final Validator validator;
-
+	
+	@Value("${app.settings.trailDays}") private long trailDays;
 	@Override
 	public BulkUploadResponse uploadCustomers(MultipartFile file) {
 		List<String> successList = new ArrayList<>();
@@ -111,6 +124,13 @@ public class AdminServiceImpl implements AdminService {
 
 		return Customer.builder().firstName(dto.getFirstName()).lastName(dto.getLastName()).emailId(dto.getEmailId())
 				.contactNo(dto.getContactNo()).gender(dto.getGender()).password(dto.getPassword()).address(address)
-				.registrationDate(LocalDate.now()).lastTrailDate(LocalDate.now().plusDays(30)).build();
+				.registrationDate(LocalDate.now()).lastTrailDate(LocalDate.now().plusDays(trailDays)).build();
+	}
+
+	@Override
+	public Admins adminAuth(AdminReqDto data) {
+		// TODO Auto-generated method stub
+		Admins admin = adminrepo.findByEmailAndPass(data.getEmail(), data.getPassword());
+		return admin;
 	}
 }

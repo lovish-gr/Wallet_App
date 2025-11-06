@@ -13,6 +13,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,8 +33,11 @@ import com.wallet.dto.common.ApiResponse;
 import com.wallet.dto.request.CustomerDocDto;
 import com.wallet.dto.request.CustomerLoginDto;
 import com.wallet.dto.request.CustomerRequestDto;
+import com.wallet.dto.response.CustomerResponseDTO;
 import com.wallet.model.Customer;
 import com.wallet.model.CustomerDocuments;
+import com.wallet.model.Gender;
+import com.wallet.model.Transaction;
 import com.wallet.service.CustomerDocumentsService;
 import com.wallet.service.CustomerService;
 import com.wallet.service.PdfService;
@@ -44,9 +48,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
-@RequestMapping(value = "/customer")
+@RequestMapping("/customer")
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerCotroller {
 
 	@Autowired
@@ -58,8 +62,7 @@ public class CustomerCotroller {
 	@PostMapping(value = "/signup")
 	public ResponseEntity<ApiResponse> createCustomer(@RequestBody @Valid CustomerRequestDto custReq) {
 
-		System.out.println("create api called" + new Date());
-		System.out.println(custReq);
+		log.info("create api called" + new Date());
 		Integer genereatedCustId = cs.createCustomer(custReq);
 
 		ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "customer created", genereatedCustId);
@@ -240,12 +243,17 @@ public class CustomerCotroller {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+	
+//	@PostMapping("/auth")
+//	public ResponseEntity<ApiResponse> auth(@RequestBody CustomerLoginDto data){
+//		CustomerResponseDTO cust = cs.customerAuth(data);
+//		ApiResponse res = new ApiResponse(HttpStatus.OK.value(), "loginSuccessful", cust);
+//		return new ResponseEntity<ApiResponse>(res, HttpStatus.OK);
+//	}
 
-	@PostMapping(value = "/login")
+	@PostMapping("/auth")
 	public ResponseEntity<ApiResponse> customerAuth(@RequestBody CustomerLoginDto custAuth) {
-		System.out.println(custAuth);
-		Customer isAuth = cs.customerAuth(custAuth);
-
+		CustomerResponseDTO isAuth = cs.customerAuth(custAuth);
 		if (isAuth != null) {
 			ApiResponse apiRes = new ApiResponse(HttpStatus.OK.value(), "login Successful", isAuth);
 			return new ResponseEntity<ApiResponse>(apiRes, HttpStatus.OK);
@@ -253,6 +261,6 @@ public class CustomerCotroller {
 			ApiResponse apiRes = new ApiResponse(HttpStatus.UNAUTHORIZED.value(), "login failed", isAuth);
 			return new ResponseEntity<ApiResponse>(apiRes, HttpStatus.UNAUTHORIZED);
 		}
-
+		
 	}
 }

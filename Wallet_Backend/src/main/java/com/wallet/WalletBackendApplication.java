@@ -7,10 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class WalletBackendApplication {
-	
-	
 	public static void main(String[] args) {
 		SpringApplication.run(WalletBackendApplication.class, args);
 	}
-
 }

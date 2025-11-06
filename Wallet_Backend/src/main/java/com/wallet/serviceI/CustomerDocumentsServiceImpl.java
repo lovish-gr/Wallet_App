@@ -10,9 +10,11 @@ import com.wallet.repo.CustomerRepo;
 import com.wallet.service.CustomerDocumentsService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerDocumentsServiceImpl implements CustomerDocumentsService {
 
 	@Autowired
@@ -64,7 +66,7 @@ public class CustomerDocumentsServiceImpl implements CustomerDocumentsService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Error deleting from database: " + e.getMessage());
+			log.info("Error deleting from database: " + e.getMessage());
 		}
 	}
 

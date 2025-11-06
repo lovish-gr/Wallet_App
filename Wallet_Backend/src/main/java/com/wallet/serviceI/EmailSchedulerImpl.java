@@ -19,8 +19,11 @@ import com.wallet.repo.CustomerRepo;
 import com.wallet.service.EmailScheduler;
 import com.wallet.service.EmailService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @ConfigurationProperties(prefix = "app.settings")
 @Service
+@Slf4j
 public class EmailSchedulerImpl implements EmailScheduler {
 
 	@Autowired
@@ -34,15 +37,15 @@ public class EmailSchedulerImpl implements EmailScheduler {
 
 	@Value("${app.settings.time}")
 	private long time;
-//    @Autowired
-//    private Environment environment;
+
 
 	@Override
 	public void scheduleWelcomeEmail(Email email) {
 
 		Instant sendTime = Instant.now().plusSeconds(time);
 
-		System.out.println("mail scheduled" + time);
+	
+		log.info("mail scheduled" + time);
 		taskScheduler.schedule(() -> {
 			emailService.sendSimpleMail(email);
 		}, Date.from(sendTime));
@@ -54,14 +57,14 @@ public class EmailSchedulerImpl implements EmailScheduler {
 		// TODO Auto-generated method stub
 		LocalDate today = LocalDate.now();
 		LocalDate tomorrow = today.plusDays(1);
-		System.out.println("expiry mail scheduld");
+		log.info("expiry mail scheduld");
 
 		List<Customer> customers = repository.findCustomersExpiringTodayOrTomorrow(today, tomorrow);
 		for (Customer customer : customers) {
 
 			emailService.LastDayMail(customer.getEmailId(), customer.getFirstName(),
 					customer.getLastTrailDate().toString());
-			System.out.println(" Sent expiry reminder to: " + customer.getEmailId());
+			log.info(" Sent expiry reminder to: " + customer.getEmailId());
 		}
 
 	}

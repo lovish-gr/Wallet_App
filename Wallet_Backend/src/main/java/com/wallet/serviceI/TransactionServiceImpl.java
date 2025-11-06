@@ -13,29 +13,28 @@ import com.wallet.repo.AccountRepo;
 import com.wallet.repo.TransactionRepo;
 import com.wallet.service.TransactionService;
 
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo tr;
 
-	private final AccountRepo ar;
+	@Autowired
+	AccountRepo ar;
 
 	@Override
 	public int transfer(TransactionDto tranReq) {
 		// TODO Auto-generated method stub
-		Account frmAcc = ar.findByAccountNumber(tranReq.fromAccountNumber);
-		Account toAcc = ar.findByAccountNumber(tranReq.accountNumber);
+		Account frmAcc = ar.findByAccountNumber(tranReq.getFromAccountNumber());
+		Account toAcc = ar.findByAccountNumber(tranReq.getAccountNumber());
 
-		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance() - tranReq.amount);
-		toAcc.setOpeningBalance(toAcc.getOpeningBalance() + tranReq.amount);
-		Transaction credTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description)
+		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance() - tranReq.getAmount());
+		toAcc.setOpeningBalance(toAcc.getOpeningBalance() + tranReq.getAmount());
+		Transaction credTrans = Transaction.builder().amount(tranReq.getAmount()).description(tranReq.getDescription())
 				.frmaccfk(frmAcc).toaccfk(toAcc).transaction_date(LocalDate.now())
 				.transaction_type(TransactionType.CREDIT).build();
-		Transaction debTrans = Transaction.builder().amount(tranReq.amount).description(tranReq.description)
+		Transaction debTrans = Transaction.builder().amount(tranReq.getAmount()).description(tranReq.getDescription())
 				.frmaccfk(toAcc).toaccfk(frmAcc).transaction_date(LocalDate.now())
 				.transaction_type(TransactionType.DEBIT).build();
 
@@ -47,13 +46,26 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public int withdraw(TransactionDto tranReq) {
 		// TODO Auto-generated method stub
-		return 0;
+		
+		Account frmAcc = ar.findByAccountNumber(tranReq.fromAccountNumber);
+		
+		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance()-tranReq.getAmount());
+		Transaction credTrans = Transaction.builder().amount(tranReq.getAmount()).description(tranReq.getDescription())
+				.frmaccfk(frmAcc).toaccfk(null).transaction_date(LocalDate.now())
+				.transaction_type(TransactionType.CREDIT).build();
+		return tr.save(credTrans).getTransaction_id();
 	}
 
 	@Override
 	public int deposite(TransactionDto tranReq) {
 		// TODO Auto-generated method stub
-		return 0;
+		Account frmAcc = ar.findByAccountNumber(tranReq.fromAccountNumber);
+		
+		frmAcc.setOpeningBalance(frmAcc.getOpeningBalance()+tranReq.getAmount());
+		Transaction credTrans = Transaction.builder().amount(tranReq.getAmount()).description(tranReq.getDescription())
+				.frmaccfk(frmAcc).toaccfk(null).transaction_date(LocalDate.now())
+				.transaction_type(TransactionType.DEBIT).build();
+		return tr.save(credTrans).getTransaction_id();
 	}
 
 }

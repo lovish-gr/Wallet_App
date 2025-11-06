@@ -1,6 +1,5 @@
 package com.wallet.model;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,62 +32,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @SequenceGenerator(name = "seq", sequenceName = "SEQ", initialValue = 1, allocationSize = 2)
 public class Customer {
-	
-//	@Id
-//	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
-//	int customerId;
-//	@NotBlank
-//	String firstName;
-//	String lastName;
-//	String emailId;
-//	String contactNo;
-//	
-//	@OneToOne
-//	@JoinColumn(name="addressFk")
-//	Address address;
-//	
-//	@Enumerated(EnumType.STRING)
-//	private Gender gender;
-//	
-//	String password;
-	
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
-    private int customerId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+	private int customerId;
 
-    @NotBlank
-    private String firstName;
+	@NotBlank
+	private String firstName;
 
-    @NotBlank
-    private String lastName;
+	@NotBlank
+	private String lastName;
 
-    @NotBlank
-    @jakarta.validation.constraints.Email
-    private String emailId;
+	@NotBlank
+	@jakarta.validation.constraints.Email
+	private String emailId;
 
-    @NotBlank
-    @Pattern(regexp = "\\d{10}", message = "ContactNo must be 10 digits")
-    private String contactNo;
+	@NotBlank
+	@Pattern(regexp = "\\d{10}", message = "ContactNo must be 10 digits")
+	private String contactNo;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "addressFk")
-    @Valid
-    private Address address;
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "addressFk")
+	@Valid
+	private Address address;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private Gender gender;
+	@Enumerated(EnumType.STRING)
+	@NotNull
+	private Gender gender;
 
-    @NotBlank
-    @Size(min = 8, message = "Password must be exactly 8 characters")
-    private String password;
+	@NotBlank
+	@Size(min = 8, message = "Password must be exactly 8 characters")
+	private String password;
 	private LocalDate registrationDate;
 	private LocalDate lastTrailDate;
-	
+
 	@OneToMany(targetEntity = Account.class, mappedBy = "customer")
-	private List<Account> accoutns=new ArrayList<>();
-	
-	
-	
-	
+	private List<Account> accoutns = new ArrayList<>();
+
 }
